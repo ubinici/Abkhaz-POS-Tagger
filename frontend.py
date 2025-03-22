@@ -16,8 +16,8 @@ hf_token = st.secrets["huggingface"]["token"]
 login(token=hf_token)
 
 # Hugging Face Hub Config
-HF_REPO_ID = "<your-username>/abkhaz-pos-tagger"
-HF_FEEDBACK_REPO = "<your-username>/abkhaz-pos-feedback"
+HF_REPO_ID = "altarbinici/Abkhaz-POS-Tagger"
+HF_FEEDBACK_REPO = "altarbinici/Abkhaz-POS-Feedback"
 MODEL_FILENAME = "pos_model_latest.pth"
 FEEDBACK_FILENAME = "feedback_log.txt"
 
