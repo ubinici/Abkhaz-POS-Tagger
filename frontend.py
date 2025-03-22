@@ -18,7 +18,7 @@ login(token=hf_token)
 # Hugging Face Hub Config
 HF_REPO_ID = "altarbinici/Abkhaz-POS-Tagger"
 HF_FEEDBACK_REPO = "altarbinici/Abkhaz-POS-Feedback"
-MODEL_FILENAME = "pos_model_latest.pth"
+MODEL_FILENAME = "pos_model.pth"
 FEEDBACK_FILENAME = "feedback_log.txt"
 
 # Load tokenizer and model
