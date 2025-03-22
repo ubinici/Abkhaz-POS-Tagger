@@ -11,26 +11,34 @@ from evaluator import evaluate_model
 from huggingface_hub import hf_hub_download, upload_file, login
 import os
 
-# Authenticate to Hugging Face using Streamlit secrets
-hf_token = st.secrets["huggingface"]["token"]
-login(token=hf_token)
+# Secure Hugging Face login
+try:
+    hf_token = st.secrets["huggingface"]["token"]
+    login(token=hf_token)
+except Exception as e:
+    st.error(f"❌ Hugging Face authentication failed: {e}")
+    st.stop()
 
-# Hugging Face Hub Config
+# Hugging Face Config
 HF_REPO_ID = "altarbinici/Abkhaz-POS-Tagger"
 HF_FEEDBACK_REPO = "altarbinici/Abkhaz-POS-Feedback"
 MODEL_FILENAME = "pos_model.pth"
 FEEDBACK_FILENAME = "feedback_log.txt"
 
-# Load tokenizer and model
+# Tokenizer and tag count
 num_tags = len(id2tag)
 tokenizer = XLMRobertaTokenizerFast.from_pretrained("xlm-roberta-base")
-model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=MODEL_FILENAME)
-model = POSModel(num_tags)
-model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
-model.eval()
 
-# Annotate user input
-def annotate_text(input_text):
+# Cached lazy-loading model
+@st.cache_resource(show_spinner=True)
+def load_model():
+    model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=MODEL_FILENAME)
+    model = POSModel(num_tags)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
+    model.eval()
+    return model
+
+def annotate_text(input_text, model):
     tokens = input_text.strip().split()
     encoded = tokenizer(
         tokens,
@@ -57,6 +65,7 @@ def annotate_text(input_text):
 
     return output
 
+
 # Streamlit Interface
 st.set_page_config(page_title="Abkhaz POS Tagger", layout="centered")
 st.title("📝 Abkhaz POS Tagging Demo")
@@ -65,6 +74,7 @@ st.write("Enter an Abkhaz sentence below to see predicted part-of-speech tags.")
 user_input = st.text_input("Enter Abkhaz sentence:", "")
 
 if user_input:
+    model = load_model()
     annotations = annotate_text(user_input)
     st.markdown("### 🔍 Predicted POS Tags:")
     for token, tag in annotations:
@@ -139,3 +149,4 @@ try:
                 evaluate_model(test_loader, num_tags, model_path)
 except Exception as e:
     st.error(f"⚠️ Could not load feedback summary: {e}")
+
