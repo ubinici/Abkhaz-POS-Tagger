@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from transformers import XLMRobertaTokenizerFast
 from model import POSModel
-from preprocessor import id_to_pos_tag
+from preprocessor import id2tag
 from trainer import train_model
 from dataloader import load_data
 from evaluator import evaluate_model
@@ -22,7 +22,7 @@ MODEL_FILENAME = "pos_model_latest.pth"
 FEEDBACK_FILENAME = "feedback_log.txt"
 
 # Load tokenizer and model
-num_tags = len(id_to_pos_tag)
+num_tags = len(id2tag)
 tokenizer = XLMRobertaTokenizerFast.from_pretrained("xlm-roberta-base")
 model_path = hf_hub_download(repo_id=HF_REPO_ID, filename=MODEL_FILENAME)
 model = POSModel(num_tags)
@@ -51,7 +51,7 @@ def annotate_text(input_text):
     for idx, word_idx in enumerate(word_ids):
         if word_idx is not None and word_idx != prev_word_idx:
             tag_id = predictions[idx]
-            tag = id_to_pos_tag.get(tag_id, "UNK")
+            tag = id2tag.get(tag_id, "UNK")
             output.append((tokens[word_idx], tag))
             prev_word_idx = word_idx
 
